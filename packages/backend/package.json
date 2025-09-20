@@ -1,0 +1,27 @@
+{
+  "name": "@imoveis/backend",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "db:push": "drizzle-kit push",
+    "dev": "bun --watch src/index.ts",
+    "studio": "bunx drizzle-kit studio"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/cheerio": "^1.0.0",
+    "cheerio": "^1.1.2",
+    "hono": "^4.9.8",
+    "node-cron": "^4.2.1",
+    "puppeteer": "^24.22.0",
+    "puppeteer-core": "^24.22.0"
+  }
+}

@@ -5,13 +5,14 @@ import PriceStep from "@/components/onboarding/PriceStep";
 import { AnimatePresence } from "framer-motion";
 import LocationStep from "@/components/onboarding/LocationStep";
 
-// Definindo tipos para os locais
+// Definindo tipos mais específicos para as regras
 export type TravelMode = "DRIVING" | "WALKING" | "BICYCLING";
+export type RuleType = "generic" | "specific";
 
-export interface LocationPreference {
-  id: string; // Para identificar unicamente cada local
-  name: string; // "Trabalho", "Academia", etc.
-  address: string;
+export interface LocationRule {
+  id: string;
+  type: RuleType;
+  target: string; // "Academia" ou "Avenida Paulista, 1578"
   maxTime: number; // Em minutos
   travelMode: TravelMode;
 }
@@ -22,7 +23,7 @@ export interface UserPreferences {
     rent: [number, number];
     condo: [number, number];
   };
-  locations: LocationPreference[]; // Adicione o array de locais
+  locations: LocationRule[]; // Usando o novo tipo LocationRule
 }
 
 const Onboarding = () => {
@@ -43,7 +44,7 @@ const Onboarding = () => {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  // Adicionamos o novo passo ao array
+  // O componente LocationStep agora vai receber as props atualizadas
   const steps = [
     <WelcomeStep key="step0" onNext={nextStep} />,
     <PriceStep
@@ -55,16 +56,17 @@ const Onboarding = () => {
     />,
     <LocationStep
       key="step2"
-      onNext={nextStep}
+      onNext={nextStep} // Este será o último passo
       onPrev={prevStep}
       preferences={preferences}
       updatePreferences={updatePreferences}
     />,
   ];
 
+  // O resto do componente permanece o mesmo...
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <div className="relative w-full max-w-md h-96 flex items-center justify-center">
+    <div className="flex flex-col justify-center items-center p-4 min-h-screen">
+      <div className="flex relative justify-center items-center w-full max-w-md h-[26rem]">
         <AnimatePresence mode="wait">{steps[step]}</AnimatePresence>
       </div>
     </div>

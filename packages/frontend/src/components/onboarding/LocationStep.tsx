@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,8 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import type { UserPreferences, LocationPreference } from "@/pages/Onboarding";
+import type { UserPreferences, LocationRule } from "@/pages/Onboarding";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -19,7 +19,7 @@ import {
   Footprints,
   Trash2,
 } from "lucide-react";
-import { AddLocationDialog } from "./AddLocationDialog";
+import { AddLocationRuleDialog } from "./AddLocationRuleDialog";
 
 interface LocationStepProps {
   onNext: () => void;
@@ -28,34 +28,40 @@ interface LocationStepProps {
   updatePreferences: (newValues: Partial<UserPreferences>) => void;
 }
 
-const TravelModeIcon = ({
-  mode,
-}: {
-  mode: LocationPreference["travelMode"];
-}) => {
-  if (mode === "DRIVING") return <Car className="h-4 w-4" />;
-  if (mode === "BICYCLING") return <Bike className="h-4 w-4" />;
-  if (mode === "WALKING") return <Footprints className="h-4 w-4" />;
+const TravelModeIcon = ({ mode }: { mode: LocationRule["travelMode"] }) => {
+  if (mode === "DRIVING")
+    return <Car className="w-4 h-4 text-muted-foreground" />;
+  if (mode === "BICYCLING")
+    return <Bike className="w-4 h-4 text-muted-foreground" />;
+  if (mode === "WALKING")
+    return <Footprints className="w-4 h-4 text-muted-foreground" />;
   return null;
 };
 
-export const LocationStep = ({
+const LocationStep = ({
   onNext,
   onPrev,
   preferences,
   updatePreferences,
 }: LocationStepProps) => {
-  const addLocation = (newLocation: Omit<LocationPreference, "id">) => {
-    const locationWithId = { ...newLocation, id: crypto.randomUUID() };
+  const addRule = (newRule: Omit<LocationRule, "id">) => {
+    const ruleWithId = { ...newRule, id: crypto.randomUUID() };
     updatePreferences({
-      locations: [...preferences.locations, locationWithId],
+      locations: [...preferences.locations, ruleWithId],
     });
   };
 
-  const removeLocation = (id: string) => {
+  const removeRule = (id: string) => {
     updatePreferences({
       locations: preferences.locations.filter((loc) => loc.id !== id),
     });
+  };
+
+  const navigate = useNavigate();
+
+  const handleFinish = () => {
+    const encodedPreferences = btoa(JSON.stringify(preferences));
+    navigate(`/dashboard?preferences=${encodedPreferences}`);
   };
 
   return (
@@ -69,69 +75,68 @@ export const LocationStep = ({
     >
       <Card className="w-[350px] md:w-[450px]">
         <CardHeader>
-          <div className="flex items-center gap-4">
+          <div className="flex gap-4 items-center">
             <Button
               variant="ghost"
               size="icon"
               onClick={onPrev}
               className="flex-shrink-0"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="w-4 h-4" />
             </Button>
             <div>
-              <CardTitle className="text-2xl">Locais Importantes</CardTitle>
+              <CardTitle className="text-2xl">
+                Onde você quer estar perto?
+              </CardTitle>
               <CardDescription>
-                Adicione lugares do seu dia a dia para acharmos imóveis
-                próximos.
+                Adicione regras para encontrar seu imóvel ideal.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 min-h-[150px]">
           {preferences.locations.length === 0 ? (
-            <div className="text-center text-muted-foreground py-10">
-              <MapPin className="mx-auto h-8 w-8 mb-2" />
-              <p>Nenhum local adicionado ainda.</p>
+            <div className="py-10 text-center text-muted-foreground">
+              <MapPin className="mx-auto mb-2 w-8 h-8" />
+              <p>Nenhuma regra de localização adicionada.</p>
             </div>
           ) : (
-            <ul className="space-y-3">
-              {preferences.locations.map((loc) => (
+            <ul className="space-y-2">
+              {preferences.locations.map((rule) => (
                 <li
-                  key={loc.id}
-                  className="flex items-center justify-between text-sm p-2 bg-muted rounded-md"
+                  key={rule.id}
+                  className="flex justify-between items-center p-3 text-sm rounded-md border"
                 >
-                  <div className="flex items-center gap-3">
-                    <TravelModeIcon mode={loc.travelMode} />
-                    <div>
-                      <p className="font-semibold">{loc.name}</p>
-                      <p className="text-muted-foreground text-xs">{`Até ${loc.maxTime} min`}</p>
-                    </div>
+                  <div className="flex flex-1 gap-3 items-start">
+                    <TravelModeIcon mode={rule.travelMode} />
+                    <p className="flex-1 break-words">
+                      {"Até "}
+                      <span className="font-semibold">{rule.maxTime} min</span>
+                      {rule.type === "generic" ? " de um(a) " : " de "}
+                      <span className="font-semibold">{rule.target}</span>
+                    </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeLocation(loc.id)}
+                    className="shrink-0"
+                    onClick={() => removeRule(rule.id)}
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </li>
               ))}
             </ul>
           )}
-          <Separator />
-          <AddLocationDialog onAddLocation={addLocation}>
-            <Button variant="outline" className="w-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Local
-            </Button>
-          </AddLocationDialog>
         </CardContent>
-        <CardFooter>
-          <Button
-            className="w-full"
-            onClick={onNext}
-            disabled={preferences.locations.length === 0}
-          >
+        <CardFooter className="flex flex-col gap-4">
+          <AddLocationRuleDialog onAddRule={addRule}>
+            <Button variant="outline" className="w-full">
+              <Plus className="mr-2 w-4 h-4" />
+              Adicionar Nova Regra
+            </Button>
+          </AddLocationRuleDialog>
+          <Button className="w-full" onClick={handleFinish}>
             Concluir e ver imóveis
           </Button>
         </CardFooter>

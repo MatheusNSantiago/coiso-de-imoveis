@@ -11,7 +11,7 @@ async function getUrlsImoveisListados(browser: Browser) {
 
   let urls_imoveis: string[] = [];
 
-  for (let pagina = 1; pagina <= 1; pagina++) {
+  for (let pagina = 1; pagina <= 10; pagina++) {
     console.log(`Buscando URLs na página ${pagina}...`);
     const page = await browser.newPage();
 
@@ -61,9 +61,15 @@ async function extractImovelInfo(
       return value || "";
     };
 
-    const getTableMoneyValue = (key: string): string => {
-      const textValue = getTableTextValue(key);
-      return textValue.replace("R$", "").replace(".", "").trim();
+    const getTableNumericValue = (key: string): number => {
+      const textValue = getTableTextValue(key)
+        .replace("R$", "")
+        .replace(" m²", "")
+        .replace(".", "")
+        .replace(",", ".")
+        .trim();
+
+      return parseFloat(textValue);
     };
 
     console.log(`Sucesso ao extrair dados do ID ${imovelId}.`);
@@ -73,14 +79,12 @@ async function extractImovelInfo(
       endereco: getTableTextValue("Endereço"),
       bairro: getTableTextValue("Bairro"),
       cidade: getTableTextValue("Cidade"),
-      quartos: getTableTextValue("Quartos"),
-      suites: getTableTextValue("Suite"),
-      vagas_garagem: getTableTextValue("Garagem"),
-      area_privativa: getTableTextValue("Área Privativa")
-        ?.replace(" m²", "")
-        .replace(",", "."),
-      valor_aluguel: getTableMoneyValue("Valor do Imóvel Aluguel"),
-      valor_condominio: getTableMoneyValue("Condomínio"),
+      quartos: getTableNumericValue("Quartos"),
+      suites: getTableNumericValue("Suite"),
+      vagas_garagem: getTableNumericValue("Garagem"),
+      area_privativa: getTableNumericValue("Área Privativa"),
+      valor_aluguel: getTableNumericValue("Valor do Imóvel Aluguel"),
+      valor_condominio: getTableNumericValue("Condomínio"),
       descricao: $("td.descricao").text().trim(),
       url: `https://www.dfimoveis.com.br${imovelUrl}`,
     };

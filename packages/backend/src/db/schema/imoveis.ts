@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 
 export const imoveis = sqliteTable("imoveis", {
   codigo_imovel: text("codigo_imovel").primaryKey(),
@@ -6,12 +6,12 @@ export const imoveis = sqliteTable("imoveis", {
   endereco: text("endereco"),
   bairro: text("bairro"),
   cidade: text("cidade"),
-  quartos: text("quartos"),
-  suites: text("suites"),
-  vagas_garagem: text("vagas_garagem"),
-  area_privativa: text("area_privativa"),
-  valor_aluguel: text("valor_aluguel"),
-  valor_condominio: text("valor_condominio"),
+  quartos: integer("quartos"),
+  suites: integer("suites"),
+  vagas_garagem: integer("vagas_garagem"),
+  area_privativa: real("area_privativa"),
+  valor_aluguel: real("valor_aluguel"),
+  valor_condominio: real("valor_condominio"),
   descricao: text("descricao"),
   url: text("url").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" })

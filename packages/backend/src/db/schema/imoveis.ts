@@ -17,6 +17,9 @@ export const imoveis = sqliteTable("imoveis", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  imagens: text("imagens", { mode: "json" }),
 });
 
 export type Imovel = typeof imoveis.$inferSelect;

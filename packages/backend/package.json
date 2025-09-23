@@ -3,10 +3,11 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "dev:browser": "lightpanda serve --host 127.0.0.1 --port 9222",
+    "dev:api": "bun --watch src/index.ts",
     "start": "bun run src/index.ts",
-    "db:push": "drizzle-kit push",
-    "dev": "bun --watch src/index.ts",
-    "studio": "bunx drizzle-kit studio"
+    "studio": "drizzle-kit studio",
+    "db:push": "drizzle-kit push"
   },
   "private": true,
   "devDependencies": {
@@ -20,6 +21,7 @@
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@types/cheerio": "^1.0.0",
     "cheerio": "^1.1.2",
+
     "hono": "^4.9.8",
     "node-cron": "^4.2.1",
     "puppeteer": "^24.22.0",

@@ -208,26 +208,3 @@ console.log(
 );
 
 export default { port: 3000, fetch: app.fetch };
-
-// const prefs = {
-//   price: {
-//     rent: [0, 1500],
-//     condo: [0, 99999],
-//   },
-//   locations: [
-//     {
-//       type: "generic",
-//       target: "Academia",
-//       maxTime: 4,
-//       travelMode: "WALKING",
-//     },
-//   ],
-// };
-//
-// let prefs_encoded = encodeURIComponent(JSON.stringify(prefs));
-// let url = `http://localhost:3000/api/imoveis?preferences=${prefs_encoded}`;
-// console.log(url);
-//
-//
-// // curl -X GET "http://localhost:3000/api/imoveis?preferences=%7B%22price%22%3A%7B%22rent%22%3A%5B0%2C1500%5D%2C%22condo%22%3A%5B0%2C99999%5D%7D%2C%22locations%22%3A%5B%7B%22type%22%3A%22generic%22%2C%22target%22%3A%22Academia%22%2C%22maxTime%22%3A4%2C%22travelMode%22%3A%22WALKING%22%7D%5D%7D" | jq
-

@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 
 export const imoveis = sqliteTable("imoveis", {
-  codigo_imovel: text("codigo_imovel").primaryKey(),
+  id: text("id").primaryKey(),
   tipo: text("tipo"),
   endereco: text("endereco"),
   bairro: text("bairro"),

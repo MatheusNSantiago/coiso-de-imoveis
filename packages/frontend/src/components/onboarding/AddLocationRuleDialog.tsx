@@ -1,4 +1,3 @@
-// packages/frontend/src/components/onboarding/AddLocationRuleDialog.tsx
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {

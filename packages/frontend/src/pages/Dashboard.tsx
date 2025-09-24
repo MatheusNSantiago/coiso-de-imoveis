@@ -1,58 +1,59 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { type Imovel } from "@/../../backend/src/db/schema";
-import { Loader2, ServerCrash } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Link, useSearchParams } from "react-router-dom";
+import { ImovelCard } from "@/components/ImovelCard";
+import { Button } from "@/components/ui/button";
+import type { Imovel } from "../../../backend/src/types";
+import { Loader2, ServerCrash, Home } from "lucide-react";
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const preferencesParam = searchParams.get("preferences");
     if (preferencesParam) {
-      const decodedPreferences = atob(preferencesParam);
-      fetch(
-        `http://localhost:3000/api/imoveis?preferences=${encodeURIComponent(decodedPreferences)}`,
-      )
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Falha na resposta da rede");
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (data.success) {
-            setImoveis(data.data);
-          } else {
-            throw new Error(data.error || "Erro ao buscar imóveis");
-          }
-        })
-        .catch((err) => {
-          console.error("Erro no fetch:", err);
-          setError(err.message);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      try {
+        // Decodifica a string Base64 e depois a URL
+        const decodedPreferences = atob(preferencesParam);
+        const apiUrl = `http://localhost:3000/api/imoveis?preferences=${encodeURIComponent(decodedPreferences)}`;
+
+        fetch(apiUrl)
+          .then((res) => {
+            if (!res.ok) throw new Error(`Erro na API: ${res.statusText}`);
+            return res.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              setImoveis(data.data);
+            } else {
+              throw new Error(
+                data.error || "Ocorreu um erro desconhecido no backend.",
+              );
+            }
+          })
+          .catch((err) => setError(err.message))
+          .finally(() => setIsLoading(false));
+      } catch (e) {
+        setError("Preferências inválidas na URL.");
+        setIsLoading(false);
+      }
+    } else {
+      setError("Nenhuma preferência foi fornecida para a busca.");
+      setIsLoading(false);
     }
   }, [searchParams]);
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">
-          Buscando os melhores imóveis para você...
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <h2 className="text-xl font-semibold">
+          Buscando os melhores imóveis...
+        </h2>
+        <p className="text-muted-foreground">
+          Isso pode levar alguns segundos, estamos calculando as rotas!
         </p>
       </div>
     );
@@ -60,60 +61,50 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen">
-        <ServerCrash className="w-12 h-12 text-destructive" />
-        <p className="mt-4 text-destructive-foreground">
-          Ocorreu um erro: {error}
-        </p>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center">
+        <ServerCrash className="h-12 w-12 text-destructive" />
+        <h2 className="text-xl font-semibold text-destructive">
+          Ocorreu um erro
+        </h2>
+        <p className="text-muted-foreground max-w-sm">{error}</p>
+        <Button asChild>
+          <Link to="/">Tentar Novamente</Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="container py-8 mx-auto">
-      <h1 className="mb-2 text-3xl font-bold">Imóveis Encontrados</h1>
-      <p className="mb-8 text-muted-foreground">
-        {imoveis.length > 0
-          ? `${imoveis.length} imóveis correspondem às suas preferências.`
-          : "Nenhum imóvel encontrado com seus critérios. Tente ampliar sua busca."}
-      </p>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {imoveis.map((imovel) => (
-          <Card key={imovel.codigo_imovel} className="flex flex-col">
-            <CardHeader>
-              <CardTitle className="truncate">{imovel.endereco}</CardTitle>
-              <CardDescription>
-                {imovel.bairro}, {imovel.cidade}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <p>
-                <strong>Tipo:</strong> {imovel.tipo}
-              </p>
-              <p>
-                <strong>Quartos:</strong> {imovel.quartos}
-              </p>
-            </CardContent>
-            <CardFooter className="flex justify-between items-center p-4 bg-muted/50">
-              <div className="text-lg font-bold text-primary">
-                R$ {imovel.valor_aluguel}
-                <span className="text-sm font-normal text-muted-foreground">
-                  /mês
-                </span>
-              </div>
-              <a
-                href={imovel.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-primary"
-              >
-                Ver mais
-              </a>
-            </CardFooter>
-          </Card>
-        ))}
+    <div className="container mx-auto py-8 px-4">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Imóveis Encontrados
+        </h1>
+        <p className="text-muted-foreground">
+          {imoveis.length > 0
+            ? `${imoveis.length} imóveis que correspondem perfeitamente ao seu estilo de vida.`
+            : "Nenhum imóvel corresponde aos seus critérios. Que tal refinar sua busca?"}
+        </p>
       </div>
+
+      {imoveis.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {imoveis.map((imovel) => (
+            <ImovelCard key={imovel.id} imovel={imovel} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg py-24 gap-4 text-center">
+          <Home className="h-12 w-12 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Nenhum resultado</h2>
+          <p className="text-muted-foreground max-w-sm">
+            Não encontramos imóveis com os filtros que você selecionou.
+          </p>
+          <Button asChild>
+            <Link to="/">Refazer a Busca</Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-// src/scraper.ts
 import puppeteer from "puppeteer-core";
 import { db } from "./db";
 import { imoveis } from "./db/schema";
@@ -33,19 +32,18 @@ export async function runScraper() {
       });
 
       if (existingImovel) {
-        // console.log(
-        //   `Imóvel já existe no banco (${imovelEndpoint}). Finalizando a busca por novos imóveis.`,
-        // );
-        // break;
-        continue
+        console.log(
+          `Imóvel já existe no banco (${imovelEndpoint}). Finalizando a busca por novos imóveis.`,
+        );
+        break;
       }
 
       // 2.2. Caso não esteja, vai na url do anúncio e da impressão para pegar os dados.
       const imovel = await scrapeImovelData(browser, imovelEndpoint);
       if (!imovel) continue;
 
-      if (!imovel.endereco){
-        console.log(imovel)
+      if (!imovel.endereco) {
+        console.log(imovel);
       }
 
       await sleep(5000);

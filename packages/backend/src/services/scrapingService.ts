@@ -11,13 +11,16 @@ import type { NewImovel } from "../db/schema";
 async function fetchPageContent(
   browser: Browser,
   url: string,
+  waitForSelector?: string,
 ): Promise<string | null> {
   const page = await browser.newPage();
   try {
-    await page.goto(url, {
-      waitUntil: "networkidle2",
-      timeout: 60000,
-    });
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+
+    if (waitForSelector) {
+      await page.waitForSelector(waitForSelector, { timeout: 15000 });
+    }
+
     return await page.content();
   } catch (error) {
     console.error(`Falha ao carregar a página: ${url}`, error);
@@ -83,7 +86,11 @@ function parseImageUrlsFromHtml(pageContent: string): string[] {
  */
 async function fetchDetailsFromMainPage(browser: Browser, endpoint: string) {
   const mainPageUrl = "https://www.dfimoveis.com.br" + endpoint;
-  const mainPageContent = await fetchPageContent(browser, mainPageUrl);
+  const mainPageContent = await fetchPageContent(
+    browser,
+    mainPageUrl,
+    "#fotos-container",
+  );
 
   if (!mainPageContent) {
     return { coordinates: null, imageUrls: [] };

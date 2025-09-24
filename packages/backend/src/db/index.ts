@@ -1,7 +1,13 @@
-import { drizzle } from 'drizzle-orm/bun-sqlite';
-import { Database } from 'bun:sqlite';
-import * as schema from './schema';
+// packages/backend/src/db/index.ts
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { imoveis, preferences, users } from "./schema";
 
-const sqlite = new Database('sqlite.db');
+const connectionString = process.env.DATABASE_URL!;
 
-export const db = drizzle(sqlite, { schema });
+export const client = postgres(connectionString, { prepare: false });
+
+export const db = drizzle({
+  connection: connectionString,
+  schema: { imoveis, preferences, users },
+});

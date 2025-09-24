@@ -1,6 +1,13 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import {
+  text,
+  integer,
+  real,
+  pgTable,
+  timestamp,
+  json,
+} from "drizzle-orm/pg-core";
 
-export const imoveis = sqliteTable("imoveis", {
+export const imoveis = pgTable("imoveis", {
   id: text("id").primaryKey(),
   tipo: text("tipo"),
   endereco: text("endereco"),
@@ -14,12 +21,10 @@ export const imoveis = sqliteTable("imoveis", {
   valor_condominio: real("valor_condominio"),
   descricao: text("descricao"),
   url: text("url").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: timestamp().notNull().defaultNow(),
   latitude: real("latitude"),
   longitude: real("longitude"),
-  imagens: text("imagens", { mode: "json" }),
+  imagens: json("imagens"),
 });
 
 export type Imovel = typeof imoveis.$inferSelect;

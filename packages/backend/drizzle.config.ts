@@ -1,10 +1,9 @@
-// packages/backend/drizzle.config.ts
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
   schema: "./src/db/schema/*",
-  dialect: "sqlite",
+  dialect: "postgresql",
   dbCredentials: {
-    url: "./sqlite.db",
+    url: process.env.DATABASE_URL!,
   },
 });

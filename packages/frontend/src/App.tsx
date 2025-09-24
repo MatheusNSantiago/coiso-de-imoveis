@@ -1,15 +1,19 @@
 import { Routes, Route } from "react-router-dom";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import AuthPage from "./pages/AuthPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <Routes>
+    <Routes>
+      <Route path="/auth" element={<AuthPage />} />
+
+      <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Onboarding />} />
         <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </main>
+      </Route>
+    </Routes>
   );
 }
 

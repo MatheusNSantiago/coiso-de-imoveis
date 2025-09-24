@@ -3,15 +3,16 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev:browser": "lightpanda serve --host 127.0.0.1 --port 9222",
-    "dev:api": "bun --watch src/index.ts",
-    "start": "bun run src/index.ts",
-    "studio": "drizzle-kit studio",
-    "db:push": "drizzle-kit push"
+    "browser": "lightpanda serve --host 127.0.0.1 --port 9222",
+    "start": "concurrently \"lightpanda serve --port 9222\" \"bun run src/index.ts\"",
+    "dev": "concurrently \"lightpanda serve --port 9222\" \"bun --watch src/index.ts\"",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
+    "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.4"
   },
   "peerDependencies": {
@@ -21,9 +22,10 @@
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@types/cheerio": "^1.0.0",
     "cheerio": "^1.1.2",
-
+    "drizzle-orm": "^0.44.5",
     "hono": "^4.9.8",
     "node-cron": "^4.2.1",
+    "postgres": "^3.4.7",
     "puppeteer": "^24.22.0",
     "puppeteer-core": "^24.22.0"
   }

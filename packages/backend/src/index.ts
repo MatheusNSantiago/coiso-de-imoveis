@@ -3,6 +3,7 @@ import { db } from "./db";
 import { cors } from "hono/cors";
 import { runScraper } from "./scraper";
 import cron from "node-cron";
+
 import { gte, and, lte } from "drizzle-orm";
 import { imoveis } from "./db/schema";
 import { doesImovelMatchLocationRules } from "./services/mapsService";
@@ -58,7 +59,6 @@ app.get("/api/imoveis", async (c) => {
 });
 
 // --- Endpoints e agendamentos auxiliares ---
-
 app.post("/api/scraper/run", async (c) => {
   console.log("Acionando o scraper manualmente via API...");
 
@@ -88,4 +88,8 @@ console.log(
   "Endpoint manual do scraper: POST http://localhost:3000/api/scraper/run",
 );
 
-export default { port: 3000, fetch: app.fetch };
+export default {
+  port: 3000,
+  fetch: app.fetch,
+  idleTimeout: 120,
+};

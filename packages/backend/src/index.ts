@@ -14,62 +14,48 @@ const app = new Hono();
 app.use("/api/*", cors());
 
 app.get("/api/imoveis", async (c) => {
-  let url = "https://www.google.com/";
-  let respose = await fetch(url);
-  console.log(respose.status);
+  try {
+    const prefsString = c.req.query("preferences");
+    if (!prefsString) {
+      return c.json(
+        { success: false, error: "Preferências não fornecidas" },
+        400,
+      );
+    }
 
-  let text = await respose.text();
-  console.log(text);
+    const preferences: UserPreferences = JSON.parse(prefsString);
+    console.log("Recebido para filtrar:", preferences);
 
-  const prefsString = c.req.query("preferences");
-  const preferences: UserPreferences = JSON.parse(prefsString!);
-  console.log("Recebido para filtrar:", preferences);
+    const imoveisFiltradosPorPreco = await db.query.imoveis.findMany({
+      where: and(
+        gte(imoveis.valor_aluguel, preferences.price.rent[0]),
+        lte(imoveis.valor_aluguel, preferences.price.rent[1]),
 
-  const data = await db.query.imoveis.findMany();
+        gte(imoveis.valor_condominio, preferences.price.condo[0]),
+        lte(imoveis.valor_condominio, preferences.price.condo[1]),
+      ),
+      orderBy: (imoveis, { desc }) => [desc(imoveis.createdAt)],
+    });
 
-  return c.json({ success: true, data: data });
-  // try {
-  //   const prefsString = c.req.query("preferences");
-  //   if (!prefsString) {
-  //     return c.json(
-  //       { success: false, error: "Preferências não fornecidas" },
-  //       400,
-  //     );
-  //   }
-  //
-  //   const preferences: UserPreferences = JSON.parse(prefsString);
-  //   console.log("Recebido para filtrar:", preferences);
-  //
-  //   const imoveisFiltradosPorPreco = await db.query.imoveis.findMany({
-  //     where: and(
-  //       gte(imoveis.valor_aluguel, preferences.price.rent[0]),
-  //       lte(imoveis.valor_aluguel, preferences.price.rent[1]),
-  //
-  //       gte(imoveis.valor_condominio, preferences.price.condo[0]),
-  //       lte(imoveis.valor_condominio, preferences.price.condo[1]),
-  //     ),
-  //     orderBy: (imoveis, { desc }) => [desc(imoveis.createdAt)],
-  //   });
-  //
-  //   console.log(
-  //     `Encontrados ${imoveisFiltradosPorPreco.length} imóveis após filtro de preço.`,
-  //   );
-  //
-  //   const imoveisCompativeis = [];
-  //   for (const imovel of imoveisFiltradosPorPreco) {
-  //     if (await doesImovelMatchLocationRules(imovel, preferences.locations)) {
-  //       imoveisCompativeis.push(imovel);
-  //     }
-  //   }
-  //
-  //   console.log(
-  //     `Encontrados ${imoveisCompativeis.length} imóveis após todos os filtros.`,
-  //   );
-  //   return c.json({ success: true, data: imoveisCompativeis });
-  // } catch (error) {
-  //   console.error("Erro ao processar a busca de imóveis:", error);
-  //   return c.json({ success: false, error: "Erro interno do servidor" }, 500);
-  // }
+    console.log(
+      `Encontrados ${imoveisFiltradosPorPreco.length} imóveis após filtro de preço.`,
+    );
+
+    const imoveisCompativeis = [];
+    for (const imovel of imoveisFiltradosPorPreco) {
+      if (await doesImovelMatchLocationRules(imovel, preferences.locations)) {
+        imoveisCompativeis.push(imovel);
+      }
+    }
+
+    console.log(
+      `Encontrados ${imoveisCompativeis.length} imóveis após todos os filtros.`,
+    );
+    return c.json({ success: true, data: imoveisCompativeis });
+  } catch (error) {
+    console.error("Erro ao processar a busca de imóveis:", error);
+    return c.json({ success: false, error: "Erro interno do servidor" }, 500);
+  }
 });
 
 // --- Endpoints e agendamentos auxiliares ---

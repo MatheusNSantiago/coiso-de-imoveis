@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "browser": "lightpanda serve --host 127.0.0.1 --port 9222",
-    "start": "concurrently \"lightpanda serve --port 9222\" \"bun run src/index.ts\"",
+    "start": "bun run src/index.ts",
     "dev": "concurrently \"lightpanda serve --port 9222\" \"bun --watch src/index.ts\"",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"

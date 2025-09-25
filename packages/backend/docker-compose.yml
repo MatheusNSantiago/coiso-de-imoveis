@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    # 1. Build: Usa o Dockerfile no diretório atual (.)
+    build: .
+
+    # 2. Comando: Sobrescreve o CMD do Dockerfile para usar o script 'dev'
+    #    que tem o --watch para hot-reloading.
+    command: bun run dev
+
+    # 3. Portas: Mapeia a porta 3000 do container para a porta 3000 da sua máquina.
+    ports:
+      - "3000:3000"
+
+    # 4. Variáveis de Ambiente: Carrega as variáveis de um arquivo .env local.
+    env_file:
+      - .env.local
+
+    # 5. Volumes (A MÁGICA ACONTECE AQUI):
+    volumes:
+      # Espelha o diretório 'src' local para o diretório 'src' dentro do container.
+      - ./src:/usr/src/app/src
+
+      # "Node Modules Trick": Evita que a pasta node_modules local sobrescreva
+      # a pasta node_modules de dentro do container, que foi instalada pelo Dockerfile.
+      # Isso garante a performance e evita conflitos de sistema operacional.
+      - /usr/src/app/node_modules

@@ -11,7 +11,7 @@ import type { UserPreferences } from "./types";
 
 const app = new Hono();
 
-app.use("/api/*", cors({ origin: "*" }));
+app.use("/api/*", cors());
 
 app.get("/api/imoveis", async (c) => {
   try {

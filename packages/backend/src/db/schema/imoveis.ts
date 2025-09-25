@@ -5,11 +5,13 @@ import {
   pgTable,
   timestamp,
   json,
+  serial,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const imoveis = pgTable("imoveis", {
-  id: text("id").primaryKey(),
-  tipo: text("tipo"),
+  id: serial("id").primaryKey(),
+  tipo: varchar("tipo", { length: 50 }),
   endereco: text("endereco"),
   bairro: text("bairro"),
   cidade: text("cidade"),
@@ -20,7 +22,7 @@ export const imoveis = pgTable("imoveis", {
   valor_aluguel: real("valor_aluguel"),
   valor_condominio: real("valor_condominio"),
   descricao: text("descricao"),
-  url: text("url").notNull(),
+  url: varchar("url", { length: 150 }).notNull(),
   createdAt: timestamp().notNull().defaultNow(),
   latitude: real("latitude"),
   longitude: real("longitude"),

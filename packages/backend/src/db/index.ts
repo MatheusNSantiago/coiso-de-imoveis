@@ -1,9 +1,9 @@
-// packages/backend/src/db/index.ts
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { imoveis, preferences, users } from "./schema";
 
 const connectionString = process.env.DATABASE_URL!;
+console.log("DATABASE_URL:", connectionString);
 
 export const client = postgres(connectionString, { prepare: false });
 

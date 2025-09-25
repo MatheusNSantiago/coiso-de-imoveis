@@ -83,11 +83,6 @@ cron.schedule(
   { timezone: "America/Sao_Paulo" },
 );
 
-console.log("Scraper agendado para rodar às 8h e 18h (Horário de Brasília).");
-console.log(
-  "Endpoint manual do scraper: POST http://localhost:3000/api/scraper/run",
-);
-
 export default {
   port: 3000,
   fetch: app.fetch,

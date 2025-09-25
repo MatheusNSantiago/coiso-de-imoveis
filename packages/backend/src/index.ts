@@ -4,7 +4,7 @@ import { cors } from "hono/cors";
 import { runScraper } from "./scraper";
 import cron from "node-cron";
 
-import { gte, and, lte } from "drizzle-orm";
+import { gte, and, lte, desc } from "drizzle-orm";
 import { imoveis } from "./db/schema";
 import { doesImovelMatchLocationRules } from "./services/mapsService";
 import type { UserPreferences } from "./types";
@@ -26,16 +26,29 @@ app.get("/api/imoveis", async (c) => {
     const preferences: UserPreferences = JSON.parse(prefsString);
     console.log("Recebido para filtrar:", preferences);
 
-    const imoveisFiltradosPorPreco = await db.query.imoveis.findMany({
-      where: and(
-        gte(imoveis.valor_aluguel, preferences.price.rent[0]),
-        lte(imoveis.valor_aluguel, preferences.price.rent[1]),
+    // const imoveisFiltradosPorPreco = await db.query.imoveis.findMany({
+    //   where: and(
+    //     gte(imoveis.valor_aluguel, preferences.price.rent[0]),
+    //     lte(imoveis.valor_aluguel, preferences.price.rent[1]),
+    //
+    //     gte(imoveis.valor_condominio, preferences.price.condo[0]),
+    //     lte(imoveis.valor_condominio, preferences.price.condo[1]),
+    //   ),
+    //   orderBy: (imoveis, { desc }) => [desc(imoveis.createdAt)],
+    // });
 
-        gte(imoveis.valor_condominio, preferences.price.condo[0]),
-        lte(imoveis.valor_condominio, preferences.price.condo[1]),
-      ),
-      orderBy: (imoveis, { desc }) => [desc(imoveis.createdAt)],
-    });
+    const imoveisFiltradosPorPreco = await db
+      .select()
+      .from(imoveis)
+      .where(
+        and(
+          gte(imoveis.valor_aluguel, preferences.price.rent[0]),
+          lte(imoveis.valor_aluguel, preferences.price.rent[1]),
+          gte(imoveis.valor_condominio, preferences.price.condo[0]),
+          lte(imoveis.valor_condominio, preferences.price.condo[1]),
+        ),
+      )
+      .orderBy(desc(imoveis.createdAt));
 
     console.log(
       `Encontrados ${imoveisFiltradosPorPreco.length} imóveis após filtro de preço.`,

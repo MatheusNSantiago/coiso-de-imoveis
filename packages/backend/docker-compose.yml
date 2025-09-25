@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     # 1. Build: Usa o Dockerfile no diretório atual (.)

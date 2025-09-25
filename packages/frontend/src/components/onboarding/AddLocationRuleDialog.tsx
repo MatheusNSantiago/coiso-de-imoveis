@@ -74,10 +74,7 @@ export const AddLocationRuleDialog = ({
   const [travelMode, setTravelMode] = useState<TravelMode>("DRIVING");
   const addressInputRef = useRef<HTMLInputElement>(null);
 
-  const { isApiLoaded, isApiLoading } = useGooglePlacesAutocomplete(
-    addressInputRef,
-    isOpen,
-  );
+  const { isApiLoading } = useGooglePlacesAutocomplete(addressInputRef, isOpen);
 
   const handleSubmit = () => {
     const finalTarget =

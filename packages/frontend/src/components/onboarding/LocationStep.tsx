@@ -39,7 +39,6 @@ const TravelModeIcon = ({ mode }: { mode: LocationRule["travelMode"] }) => {
 };
 
 const LocationStep = ({
-  onNext,
   onPrev,
   preferences,
   updatePreferences,

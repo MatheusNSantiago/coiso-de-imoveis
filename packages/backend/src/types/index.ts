@@ -1,4 +1,4 @@
-import { imoveis } from "@/db/schema";
+import type { imoveis } from "../db/schema";
 
 // Tipos relacionados ao nosso banco de dados
 export type Imovel = typeof imoveis.$inferSelect;

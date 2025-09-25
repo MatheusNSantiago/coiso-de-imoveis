@@ -25,7 +25,7 @@ const formatRent = (value: number | null) => {
 };
 
 export const ImovelCard = ({ imovel }: ImovelCardProps) => {
-  const firstImage = imovel.imagens?.[0];
+  const firstImage = (imovel.imagens as string[])?.[0];
 
   return (
     <Card className="flex flex-col overflow-hidden">

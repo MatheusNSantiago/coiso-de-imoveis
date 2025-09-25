@@ -1,0 +1,13 @@
+node_modules
+
+# Ignorar arquivos de ambiente, pois eles serão injetados pelo Render
+.env*
+
+# Ignorar arquivos do Docker e do Git
+Dockerfile
+.dockerignore
+.git
+.gitignore
+
+# Ignorar o binário local do lightpanda
+lightpanda

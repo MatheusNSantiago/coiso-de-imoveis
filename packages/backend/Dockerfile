@@ -1,8 +1,6 @@
-FROM oven/bun:1 as base
+FROM oven/bun:latest as base
 
 WORKDIR /usr/src/app
-
-RUN apt-get update && apt-get install -y curl unzip procps
 
 RUN apt-get update && apt-get install -y curl procps
 

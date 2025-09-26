@@ -1,6 +1,7 @@
 import { Browser } from "puppeteer";
 import * as cheerio from "cheerio";
 import type { NewImovel } from "../db/schema";
+import { sleep } from "bun";
 
 /**
  * Busca o conteúdo HTML de uma página de imóvel específica.
@@ -170,15 +171,23 @@ export async function fetchRecentImoveis(
     console.log(`Buscando URLs na página ${pageNum}...`);
     const pageUrl = `${listingUrl}&pagina=${pageNum}`;
     console.log(pageUrl);
-    const pageContent = await fetchPageContent(browser, pageUrl, ".new-card");
+    const pageContent = await fetchPageContent(
+      browser,
+      pageUrl,
+      "#resultadoDaBuscaDeImoveis",
+    );
+
+    await sleep(5000);
 
     if (pageContent) {
       const $ = cheerio.load(pageContent);
       const pageEndpoints: string[] = [];
-      $(".new-card").each((_, element) => {
-        const href = $(element).attr("href");
-        if (href) pageEndpoints.push(href);
-      });
+      $("#resultadoDaBuscaDeImoveis")
+        .children("a")
+        .each((_, element) => {
+          const href = $(element).attr("href");
+          if (href) pageEndpoints.push(href);
+        });
 
       if (pageEndpoints.length === 0) break;
 

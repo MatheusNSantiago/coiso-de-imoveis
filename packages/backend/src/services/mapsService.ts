@@ -20,7 +20,10 @@ async function geocodeAddress(address: string): Promise<GeocodeResult | null> {
   }
   try {
     const response = await googleMapsClient.geocode({
-      params: { address, key: process.env.GOOGLE_MAPS_API_KEY! },
+      params: {
+        address,
+        key: process.env.GOOGLE_MAPS_API_KEY!,
+      },
     });
     if (response.data.results.length > 0) {
       const result = response.data.results[0]!;

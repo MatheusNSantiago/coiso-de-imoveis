@@ -1,4 +1,4 @@
-import { Browser } from "puppeteer";
+import puppeteer from "puppeteer-core";
 import * as cheerio from "cheerio";
 import type { NewImovel } from "../db/schema";
 import { sleep } from "bun";
@@ -10,10 +10,13 @@ import { sleep } from "bun";
  * @returns O conteúdo HTML da página como string, ou null em caso de erro.
  */
 async function fetchPageContent(
-  browser: Browser,
   url: string,
   waitForSelector?: string,
 ): Promise<string | null> {
+  let browser = await puppeteer.connect({
+    browserWSEndpoint: "ws://127.0.0.1:9222",
+  });
+
   const page = await browser.newPage();
   try {
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
@@ -28,6 +31,7 @@ async function fetchPageContent(
     return null;
   } finally {
     await page.close();
+    await browser.disconnect();
   }
 }
 
@@ -85,10 +89,9 @@ function parseImageUrlsFromHtml(pageContent: string): string[] {
  * @param endpoint O caminho do imóvel (ex: /imovel/apartamento-...).
  * @returns Um objeto com latitude, longitude e imagens.
  */
-async function fetchDetailsFromMainPage(browser: Browser, endpoint: string) {
+async function fetchDetailsFromMainPage(endpoint: string) {
   const mainPageUrl = "https://www.dfimoveis.com.br" + endpoint;
   const mainPageContent = await fetchPageContent(
-    browser,
     mainPageUrl,
     "#fotos-container",
   );
@@ -109,13 +112,12 @@ async function fetchDetailsFromMainPage(browser: Browser, endpoint: string) {
  * @returns Um objeto parcial NewImovel com os dados básicos, ou null em caso de erro.
  */
 async function fetchDetailsFromContractPage(
-  browser: Browser,
   imovelEndpoint: string,
 ): Promise<Partial<NewImovel> | null> {
   const imovelId = imovelEndpoint.split("-").pop()!;
 
   const printPageUrl = `https://www.dfimoveis.com.br/imovel/impressao/${imovelId}`;
-  const pageContent = await fetchPageContent(browser, printPageUrl);
+  const pageContent = await fetchPageContent(printPageUrl);
   if (!pageContent) return null;
 
   const $ = cheerio.load(pageContent);
@@ -161,7 +163,6 @@ async function fetchDetailsFromContractPage(
  * @returns Um array de strings com os endpoints dos imóveis encontrados.
  */
 export async function fetchRecentImoveis(
-  browser: Browser,
   maxPages: number = 2,
 ): Promise<string[]> {
   const listingUrl = `https://www.dfimoveis.com.br/aluguel/df/todos/apartamento?ordenamento=mais-recente`;
@@ -170,9 +171,7 @@ export async function fetchRecentImoveis(
   for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
     console.log(`Buscando URLs na página ${pageNum}...`);
     const pageUrl = `${listingUrl}&pagina=${pageNum}`;
-    console.log(pageUrl);
     const pageContent = await fetchPageContent(
-      browser,
       pageUrl,
       "#resultadoDaBuscaDeImoveis",
     );
@@ -206,15 +205,11 @@ export async function fetchRecentImoveis(
  * @returns Um objeto NewImovel completo pronto para ser inserido no banco.
  */
 export async function scrapeImovelData(
-  browser: Browser,
   endpoint: string,
 ): Promise<Partial<NewImovel> | null> {
-  const { coordinates, imageUrls } = await fetchDetailsFromMainPage(
-    browser,
-    endpoint,
-  );
+  const { coordinates, imageUrls } = await fetchDetailsFromMainPage(endpoint);
 
-  const basicDetails = await fetchDetailsFromContractPage(browser, endpoint);
+  const basicDetails = await fetchDetailsFromContractPage(endpoint);
 
   if (!basicDetails || !basicDetails.id) {
     console.error(

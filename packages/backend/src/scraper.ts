@@ -1,4 +1,3 @@
-import puppeteer from "puppeteer-core";
 import { db } from "./db";
 import { imoveis } from "./db/schema";
 import { eq } from "drizzle-orm";
@@ -15,12 +14,8 @@ export async function runScraper() {
   );
   console.log("=========================================");
 
-  let browser = await puppeteer.connect({
-    browserWSEndpoint: "ws://127.0.0.1:9222",
-  });
-
   try {
-    const imovelEndpoints = await fetchRecentImoveis(browser, 8);
+    const imovelEndpoints = await fetchRecentImoveis(8);
     let newImoveisAddedCount = 0;
 
     for (const imovelEndpoint of imovelEndpoints) {
@@ -39,7 +34,7 @@ export async function runScraper() {
       }
 
       // 2.2. Caso não esteja, vai na url do anúncio e da impressão para pegar os dados.
-      const imovel = await scrapeImovelData(browser, imovelEndpoint);
+      const imovel = await scrapeImovelData(imovelEndpoint);
       if (!imovel) continue;
 
       if (!imovel.endereco) {
@@ -68,8 +63,6 @@ export async function runScraper() {
       error,
     );
   } finally {
-    await browser.disconnect();
-
     console.log("=========================================");
     console.log("Execução do scraper finalizada.");
     console.log("=========================================");

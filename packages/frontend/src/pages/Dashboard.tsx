@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { ImovelCard } from "@/components/ImovelCard";
 import { Button } from "@/components/ui/button";
 import { Loader2, ServerCrash, Home } from "lucide-react";
+import axios from "axios";
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
@@ -14,18 +15,13 @@ const Dashboard = () => {
     const preferencesParam = searchParams.get("preferences");
     if (preferencesParam) {
       try {
-        // Decodifica a string Base64 e depois a URL
         const decodedPreferences = atob(preferencesParam);
+        const apiUrl = `${import.meta.env.VITE_BACKEND_API_BASE_URL}/api/imoveis`;
 
-        // const BACKEND_API_BASE_URL = import.meta.env.BACKEND_API_BASE_URL!;
-        const apiUrl = `${process.env.BACKEND_API_BASE_URL!}/api/imoveis?preferences=${encodeURIComponent(decodedPreferences)}`;
-
-        fetch(apiUrl)
-          .then((res) => {
-            if (!res.ok) throw new Error(`Erro na API: ${res.statusText}`);
-            return res.json();
-          })
-          .then((data) => {
+        axios
+          .get(apiUrl, { params: { preferences: decodedPreferences } })
+          .then((response) => {
+            const data = response.data;
             if (data.success) {
               setImoveis(data.data);
             } else {
@@ -34,9 +30,20 @@ const Dashboard = () => {
               );
             }
           })
-          .catch((err) => setError(err.message))
+          .catch((err) => {
+            // axios.isAxiosError pode ser usado para verificar erros específicos do axios
+            if (axios.isAxiosError(err) && err.response) {
+              setError(
+                err.response.data.message ||
+                  err.response.data.error ||
+                  `Erro na API: ${err.response.statusText}`,
+              );
+            } else {
+              setError(err.message);
+            }
+          })
           .finally(() => setIsLoading(false));
-      } catch (e) {
+      } catch (e: any) {
         setError("Preferências inválidas na URL.");
         setIsLoading(false);
       }

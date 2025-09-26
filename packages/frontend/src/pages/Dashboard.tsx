@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { ImovelCard } from "@/components/ImovelCard";
 import { Button } from "@/components/ui/button";
 import { Loader2, ServerCrash, Home } from "lucide-react";
+import { env } from "bun";
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
@@ -17,8 +18,8 @@ const Dashboard = () => {
         // Decodifica a string Base64 e depois a URL
         const decodedPreferences = atob(preferencesParam);
 
-        const BACKEND_API_BASE_URL = import.meta.env.BACKEND_API_BASE_URL!;
-        const apiUrl = `${BACKEND_API_BASE_URL}/api/imoveis?preferences=${encodeURIComponent(decodedPreferences)}`;
+        // const BACKEND_API_BASE_URL = import.meta.env.BACKEND_API_BASE_URL!;
+        const apiUrl = `${env.BACKEND_API_BASE_URL!}/api/imoveis?preferences=${encodeURIComponent(decodedPreferences)}`;
 
         fetch(apiUrl)
           .then((res) => {

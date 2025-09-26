@@ -7,11 +7,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { Imovel } from "../../../backend/src/types";
 import { BedDouble, Bath, Car, Ruler } from "lucide-react";
 
 interface ImovelCardProps {
-  imovel: Imovel;
+  imovel: any;
 }
 
 // Função para formatar o valor do aluguel

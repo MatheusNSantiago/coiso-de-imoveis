@@ -169,6 +169,7 @@ export async function fetchRecentImoveis(
   for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
     console.log(`Buscando URLs na página ${pageNum}...`);
     const pageUrl = `${listingUrl}&pagina=${pageNum}`;
+    console.log(pageUrl)
     const pageContent = await fetchPageContent(browser, pageUrl);
 
     if (pageContent) {

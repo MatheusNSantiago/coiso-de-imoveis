@@ -10,7 +10,7 @@ import { doesImovelMatchLocationRules } from "./services/mapsService";
 import type { UserPreferences } from "./types";
 
 console.log("Iniciando o processo do LightPanda em segundo plano...");
-const lightpandaProc = Bun.spawn(["./lightpanda", "serve", "--port", "9222"], {
+const lightpandaProc = Bun.spawn(["lightpanda", "serve", "--port", "9222"], {
   stdout: "inherit", // Redireciona a saída para o log principal
   stderr: "inherit", // Redireciona os erros para o log principal
 });
@@ -94,5 +94,5 @@ export default {
   port: process.env.PORT || 3000,
   hostname: "0.0.0.0",
   fetch: app.fetch,
-  idleTimeout: 120,
+  idleTimeout: 90,
 };

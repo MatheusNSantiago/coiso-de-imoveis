@@ -137,7 +137,7 @@ async function fetchDetailsFromContractPage(
     parseNumericValue(getTableText(key));
 
   return {
-    id: imovelId,
+    id: Number(imovelId),
     tipo: getTableText("Tipo"),
     endereco: getTableText("Endereço"),
     bairro: getTableText("Bairro"),

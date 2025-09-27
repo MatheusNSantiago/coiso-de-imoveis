@@ -30,7 +30,7 @@ export interface UserPreferences {
 }
 
 const Onboarding = () => {
-  const [step, setStep] = useState(2);
+  const [step, setStep] = useState(0);
 
   const [preferences, setPreferences] = useState<UserPreferences>({
     bedrooms: 2,

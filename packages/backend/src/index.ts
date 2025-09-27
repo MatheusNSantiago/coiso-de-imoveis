@@ -33,25 +33,32 @@ app.get("/api/imoveis", async (c) => {
     const preferences: UserPreferences = JSON.parse(prefsString);
     console.log("Recebido para filtrar:", preferences);
 
-    const imoveisFiltradosPorPreco = await db.query.imoveis.findMany({
+    const imoveisFiltrados = await db.query.imoveis.findMany({
       where: and(
         gte(imoveis.valor_aluguel, preferences.price.rent[0]),
         lte(imoveis.valor_aluguel, preferences.price.rent[1]),
-
         gte(imoveis.valor_condominio, preferences.price.condo[0]),
         lte(imoveis.valor_condominio, preferences.price.condo[1]),
+        gte(imoveis.quartos, preferences.bedrooms),
+        gte(imoveis.vagas_garagem, preferences.parkingSpots),
+        // gte(imoveis.suites, preferences.bathrooms), // Assumindo que banheiros = suítes
       ),
       orderBy: (imoveis, { desc }) => [desc(imoveis.createdAt)],
     });
 
     console.log(
-      `Encontrados ${imoveisFiltradosPorPreco.length} imóveis após filtro de preço.`,
+      `Encontrados ${imoveisFiltrados.length} imóveis após filtro de preço.`,
     );
 
     const imoveisCompativeis = [];
-    for (const imovel of imoveisFiltradosPorPreco) {
-      if (await doesImovelMatchLocationRules(imovel, preferences.locations)) {
-        imoveisCompativeis.push(imovel);
+    for (const imovel of imoveisFiltrados) {
+      const { isMatch, matchedRules } = (await doesImovelMatchLocationRules(
+        imovel,
+        preferences.locations,
+      )) ?? { isMatch: false, matchedRules: [] };
+
+      if (isMatch) {
+        imoveisCompativeis.push({ ...imovel, matchedRules });
       }
     }
 

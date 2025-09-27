@@ -4,7 +4,6 @@ import {
   type Place,
   PlacesNearbyRanking,
   TravelMode,
-  type DirectionsRequest,
 } from "@googlemaps/google-maps-services-js";
 import type { Imovel, LocationRule, MatchedRuleResult } from "@/types";
 
@@ -136,7 +135,6 @@ const getNextDepartureTime = (timeStr: string): Date => {
  * Função principal do serviço. Verifica se um único imóvel atende a uma lista de regras de localização.
  * @param imovel - O objeto do imóvel a ser verificado.
  * @param rules - Um array de regras de localização definidas pelo usuário.
- * @returns `true` se o imóvel passar em todas as regras, `false` caso contrário.
  */
 export async function doesImovelMatchLocationRules(
   imovel: Imovel,

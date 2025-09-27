@@ -18,6 +18,7 @@ import {
   Bike,
   Footprints,
   Trash2,
+  Clock,
 } from "lucide-react";
 import { AddLocationRuleDialog } from "./AddLocationRuleDialog";
 
@@ -108,12 +109,22 @@ const LocationStep = ({
                 >
                   <div className="flex flex-1 gap-3 items-start">
                     <TravelModeIcon mode={rule.travelMode} />
-                    <p className="flex-1 break-words">
-                      {"Até "}
-                      <span className="font-semibold">{rule.maxTime} min</span>
-                      {rule.type === "generic" ? " de um(a) " : " de "}
-                      <span className="font-semibold">{rule.target}</span>
-                    </p>
+                    <div className="flex-1">
+                      <p className="break-words">
+                        {"Até "}
+                        <span className="font-semibold">
+                          {rule.maxTime} min
+                        </span>
+                        {rule.type === "generic" ? " de um(a) " : " de "}
+                        <span className="font-semibold">{rule.target}</span>
+                      </p>
+                      {rule.departureTime && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <Clock className="h-3 w-3" />
+                          partindo às {rule.departureTime}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <Button
                     variant="ghost"

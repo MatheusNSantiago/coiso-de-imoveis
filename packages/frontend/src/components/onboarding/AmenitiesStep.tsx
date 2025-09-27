@@ -1,4 +1,3 @@
-// src/components/onboarding/AmenitiesStep.tsx
 import { Button } from "@/components/ui/button";
 import {
   Card,

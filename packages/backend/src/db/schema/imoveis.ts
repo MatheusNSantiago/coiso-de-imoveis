@@ -5,12 +5,12 @@ import {
   pgTable,
   timestamp,
   json,
-  serial,
   varchar,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const imoveis = pgTable("imoveis", {
-  id: serial("id").primaryKey(),
+  id: text("id").primaryKey(),
   tipo: varchar("tipo", { length: 50 }),
   endereco: text("endereco"),
   bairro: text("bairro"),
@@ -27,6 +27,7 @@ export const imoveis = pgTable("imoveis", {
   latitude: real("latitude"),
   longitude: real("longitude"),
   imagens: json("imagens"),
+  amenities: jsonb("amenities").$type<string[]>(),
 });
 
 export type Imovel = typeof imoveis.$inferSelect;

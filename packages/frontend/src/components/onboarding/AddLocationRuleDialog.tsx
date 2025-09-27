@@ -72,6 +72,7 @@ export const AddLocationRuleDialog = ({
   const [target, setTarget] = useState("");
   const [maxTime, setMaxTime] = useState(15);
   const [travelMode, setTravelMode] = useState<TravelMode>("DRIVING");
+  const [departureTime, setDepartureTime] = useState("");
   const addressInputRef = useRef<HTMLInputElement>(null);
 
   const { isApiLoading } = useGooglePlacesAutocomplete(addressInputRef, isOpen);
@@ -81,16 +82,26 @@ export const AddLocationRuleDialog = ({
       ruleType === "specific" ? addressInputRef.current?.value || "" : target;
 
     if (finalTarget && maxTime > 0) {
-      onAddRule({ type: ruleType, target: finalTarget, maxTime, travelMode });
-      // Resetar e fechar
-      setIsOpen(false); // Primeiro fecha, depois reseta para evitar "flicker"
+      const newRule: Omit<LocationRule, "id"> = {
+        type: ruleType,
+        target: finalTarget,
+        maxTime,
+        travelMode,
+      };
+      if (travelMode === "DRIVING" && departureTime) {
+        newRule.departureTime = departureTime;
+      }
+
+      onAddRule(newRule);
+      setIsOpen(false);
       setTimeout(() => {
         setRuleType("generic");
         setTarget("");
         if (addressInputRef.current) addressInputRef.current.value = "";
         setMaxTime(15);
         setTravelMode("DRIVING");
-      }, 150); // Timeout para dar tempo da animação de fechar ocorrer
+        setDepartureTime("");
+      }, 150);
     }
   };
 
@@ -101,7 +112,9 @@ export const AddLocationRuleDialog = ({
         <DialogHeader>
           <DialogTitle>Adicionar Nova Regra</DialogTitle>
           <DialogDescription>
-            Defina um local ou tipo de lugar e o tempo máximo de deslocamento.
+            {
+              "Defina um local, tempo de deslocamento e, se necessário, o horário de pico."
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -114,12 +127,13 @@ export const AddLocationRuleDialog = ({
               type="single"
               value={ruleType}
               onValueChange={(value: RuleType) => value && setRuleType(value)}
-              className="grid grid-cols-2 mt-2 w-full"
+              className="grid grid-cols-2 mt-3 w-full"
             >
               <ToggleGroupItem
                 value="generic"
                 aria-label="Tipo de Lugar"
-                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+                // className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+                className="data-[state=on]:shadow-[0_1.5px_3px_0.5px_rgba(0,0,0,0.2)]"
               >
                 <Building className="mr-2 w-4 h-4" />
                 Tipo de Lugar
@@ -127,7 +141,7 @@ export const AddLocationRuleDialog = ({
               <ToggleGroupItem
                 value="specific"
                 aria-label="Endereço Específico"
-                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+                className="data-[state=on]:shadow-[0_1.5px_3px_0.5px_rgba(0,0,0,0.2)]"
               >
                 <MapPin className="mr-2 w-4 h-4" />
                 Endereço
@@ -187,7 +201,7 @@ export const AddLocationRuleDialog = ({
               <ToggleGroupItem
                 value="DRIVING"
                 aria-label="Carro"
-                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+                className="data-[state=on]:shadow-[0_1.5px_3px_0.5px_rgba(0,0,0,0.25)]"
               >
                 <Car className="mr-2 w-4 h-4" />
                 Carro
@@ -195,7 +209,7 @@ export const AddLocationRuleDialog = ({
               <ToggleGroupItem
                 value="BICYCLING"
                 aria-label="Bicicleta"
-                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+                className="data-[state=on]:shadow-[0_1.5px_3px_0.5px_rgba(0,0,0,0.25)]"
               >
                 <Bike className="mr-2 w-4 h-4" />
                 Bicicleta
@@ -203,12 +217,26 @@ export const AddLocationRuleDialog = ({
               <ToggleGroupItem
                 value="WALKING"
                 aria-label="A pé"
-                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+                className="data-[state=on]:shadow-[0_1.5px_3px_0.5px_rgba(0,0,0,0.25)]"
               >
                 <Footprints className="mr-2 w-4 h-4" />A pé
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
+
+          {travelMode === "DRIVING" && (
+            <div className="animate-in fade-in flex w-full items-center space-x-4">
+              <Label className="font-semibold">
+                Horário de Partida (Opcional):
+              </Label>
+              <Input
+                type="time"
+                value={departureTime}
+                onChange={(e) => setDepartureTime(e.target.value)}
+                className="mt-2 w-32"
+              />
+            </div>
+          )}
         </div>
 
         <DialogFooter className="pt-4">

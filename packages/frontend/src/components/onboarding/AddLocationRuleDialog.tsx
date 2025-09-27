@@ -116,13 +116,18 @@ export const AddLocationRuleDialog = ({
               onValueChange={(value: RuleType) => value && setRuleType(value)}
               className="grid grid-cols-2 mt-2 w-full"
             >
-              <ToggleGroupItem value="generic" aria-label="Tipo de Lugar">
+              <ToggleGroupItem
+                value="generic"
+                aria-label="Tipo de Lugar"
+                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+              >
                 <Building className="mr-2 w-4 h-4" />
                 Tipo de Lugar
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="specific"
                 aria-label="Endereço Específico"
+                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
               >
                 <MapPin className="mr-2 w-4 h-4" />
                 Endereço
@@ -179,15 +184,27 @@ export const AddLocationRuleDialog = ({
               }
               className="grid grid-cols-3 mt-2 w-full"
             >
-              <ToggleGroupItem value="DRIVING" aria-label="Carro">
+              <ToggleGroupItem
+                value="DRIVING"
+                aria-label="Carro"
+                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+              >
                 <Car className="mr-2 w-4 h-4" />
                 Carro
               </ToggleGroupItem>
-              <ToggleGroupItem value="BICYCLING" aria-label="Bicicleta">
+              <ToggleGroupItem
+                value="BICYCLING"
+                aria-label="Bicicleta"
+                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+              >
                 <Bike className="mr-2 w-4 h-4" />
                 Bicicleta
               </ToggleGroupItem>
-              <ToggleGroupItem value="WALKING" aria-label="A pé">
+              <ToggleGroupItem
+                value="WALKING"
+                aria-label="A pé"
+                className="data-[state=on]:bg-muted-foreground data-[state=on]:text-primary-foreground hover:bg-muted"
+              >
                 <Footprints className="mr-2 w-4 h-4" />A pé
               </ToggleGroupItem>
             </ToggleGroup>

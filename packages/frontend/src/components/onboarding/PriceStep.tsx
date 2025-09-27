@@ -80,9 +80,9 @@ const PriceStep = ({
             </div>
             <Slider
               id="rent-slider"
-              min={500}
-              max={10000}
-              step={100}
+              min={0}
+              max={5000}
+              step={50}
               value={preferences.price.rent}
               onValueChange={handleRentChange}
             />
@@ -96,7 +96,7 @@ const PriceStep = ({
             <Slider
               id="condo-slider"
               min={0}
-              max={3000}
+              max={5000}
               step={50}
               value={preferences.price.condo}
               onValueChange={handleCondoChange}

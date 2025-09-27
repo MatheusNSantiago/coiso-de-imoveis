@@ -21,16 +21,17 @@ const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
+      className="size-full flex items-center"
     >
-      <Card className="w-[350px] md:w-[450px] text-center">
+      <Card className="w-full text-center">
         <CardHeader>
           <div className="mx-auto bg-primary/10 p-4 rounded-full mb-4">
             <Home className="w-10 h-10 text-primary" />
           </div>
           <CardTitle className="text-2xl">Encontre o seu próximo lar</CardTitle>
           <CardDescription>
-            Vamos te ajudar a encontrar o imóvel ideal baseado no seu estilo de vida.
-            Responda algumas perguntas rápidas para começar.
+            Vamos te ajudar a encontrar o imóvel ideal baseado no seu estilo de
+            vida. Responda algumas perguntas rápidas para começar.
           </CardDescription>
         </CardHeader>
         <CardContent>

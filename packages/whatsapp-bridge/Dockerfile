@@ -31,10 +31,8 @@ COPY --from=builder /whatsapp-bridge .
 # Expõe a porta 8080, que é a porta que o servidor de API em Go usa
 EXPOSE 8080
 
-# Define um volume. No Railway, vamos "montar" um disco persistente aqui.
-# Isso garante que a sessão do WhatsApp (o login via QR code) não se perca
-# quando o container reiniciar.
-VOLUME /root/store
+# A LINHA ABAIXO FOI REMOVIDA
+# VOLUME /root/store
 
 # O comando que será executado quando o container iniciar
 CMD ["./whatsapp-bridge"]

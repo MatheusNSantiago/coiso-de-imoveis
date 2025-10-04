@@ -54,7 +54,7 @@ ${imovel.url}`;
 
     // Usa a nova função de envio
     const success = await sendWhatsAppMessage(
-      "5561984128814",
+      userProfile.phoneNumber!,
       message,
     );
 

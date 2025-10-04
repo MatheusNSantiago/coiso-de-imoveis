@@ -20,6 +20,18 @@ interface PhoneStepProps {
   updatePreferences: (newValues: Partial<UserPreferences>) => void;
 }
 
+// Função para formatar o número de telefone
+const formatPhoneNumber = (value: string): string => {
+  if (!value) return "";
+  const digits = value.replace(/\D/g, "");
+
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10)
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+};
+
 const PhoneStep = ({
   onNext,
   onPrev,
@@ -27,10 +39,17 @@ const PhoneStep = ({
   updatePreferences,
 }: PhoneStepProps) => {
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Simples máscara para DDI + DDD + Número
-    const value = e.target.value.replace(/\D/g, "");
-    updatePreferences({ phoneNumber: value });
+    const rawValue = e.target.value.replace(/\D/g, "");
+    // Armazena o número completo com DDI, mas sem formatação
+    updatePreferences({ phoneNumber: `55${rawValue}` });
   };
+
+  // Extrai apenas os dígitos após o "55" para exibição e formatação
+  const displayValue = preferences.phoneNumber?.startsWith("55")
+    ? preferences.phoneNumber.substring(2)
+    : preferences.phoneNumber || "";
+
+  const isPhoneValid = displayValue.length === 10 || displayValue.length === 11;
 
   return (
     <motion.div
@@ -55,37 +74,31 @@ const PhoneStep = ({
             <div>
               <CardTitle className="text-2xl">Seu WhatsApp</CardTitle>
               <CardDescription>
-                Digite seu número para receber os alertas. Usaremos o formato
-                internacional.
+                Digite seu DDD e número para receber os alertas de imóveis.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Label htmlFor="phone">Número com DDI e DDD</Label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="phone">Número de Telefone</Label>
+          <div className="relative flex items-center">
+            <div className="absolute left-3 flex items-center pointer-events-none">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">+55</span>
+            </div>
             <Input
               id="phone"
               type="tel"
-              placeholder="Ex: 5561999998888"
-              value={preferences.phoneNumber || ""}
+              placeholder="(DD) XXXXX-XXXX"
+              value={formatPhoneNumber(displayValue)}
               onChange={handlePhoneChange}
-              className="pl-9"
+              className="pl-[70px]" // Aumenta o padding para acomodar o prefixo
+              maxLength={15} // Limita o tamanho do input formatado (e.g., "(11) 98888-7777")
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Exemplo: Brasil (55), Brasília (61) e o seu número.
-          </p>
         </CardContent>
         <CardFooter>
-          <Button
-            className="w-full"
-            onClick={onNext}
-            disabled={
-              !preferences.phoneNumber || preferences.phoneNumber.length < 12
-            }
-          >
+          <Button className="w-full" onClick={onNext} disabled={!isPhoneValid}>
             Próximo
           </Button>
         </CardFooter>

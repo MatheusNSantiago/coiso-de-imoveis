@@ -4,12 +4,16 @@ import { ImovelCard } from "@/components/ImovelCard";
 import { Button } from "@/components/ui/button";
 import { Loader2, ServerCrash, Home } from "lucide-react";
 import axios from "axios";
+import { supabase } from "@/lib/supabaseClient"; // Importar Supabase
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const [imoveis, setImoveis] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [sendingImovelId, setSendingImovelId] = useState<string | null>(null);
+  // ---------------------------------------------
 
   useEffect(() => {
     const preferencesParam = searchParams.get("preferences");
@@ -21,17 +25,16 @@ const Dashboard = () => {
         axios
           .get(apiUrl, { params: { preferences: decodedPreferences } })
           .then((response) => {
-            const data = response.data;
-            if (data.success) {
-              setImoveis(data.data);
+            if (response.data.success) {
+              setImoveis(response.data.data);
             } else {
               throw new Error(
-                data.error || "Ocorreu um erro desconhecido no backend.",
+                response.data.error ||
+                  "Ocorreu um erro desconhecido no backend.",
               );
             }
           })
           .catch((err) => {
-            // axios.isAxiosError pode ser usado para verificar erros específicos do axios
             if (axios.isAxiosError(err) && err.response) {
               setError(
                 err.response.data.message ||
@@ -52,6 +55,31 @@ const Dashboard = () => {
       setIsLoading(false);
     }
   }, [searchParams]);
+
+  // --- NOVA FUNÇÃO PARA ENVIAR WHATSAPP ---
+  const handleSendToWhatsApp = async (imovel: any) => {
+    setSendingImovelId(imovel.id);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("Usuário não autenticado.");
+
+      const apiUrl = `${import.meta.env.VITE_BACKEND_API_BASE_URL}/api/notify-single`;
+      await axios.post(
+        apiUrl,
+        { imovel },
+        { headers: { Authorization: `Bearer ${session.access_token}` } },
+      );
+      // Poderia adicionar um feedback de sucesso aqui (Toast, etc.)
+    } catch (err) {
+      console.error("Erro ao enviar notificação para o WhatsApp:", err);
+      // Poderia adicionar um feedback de erro aqui
+    } finally {
+      setSendingImovelId(null);
+    }
+  };
+  // ----------------------------------------
 
   if (isLoading) {
     return (
@@ -90,15 +118,19 @@ const Dashboard = () => {
         </h1>
         <p className="text-muted-foreground">
           {imoveis.length > 0
-            ? `${imoveis.length} imóveis que correspondem perfeitamente ao seu estilo de vida.`
+            ? `${imoveis.length} imóveis que correspondem ao seu estilo de vida.`
             : "Nenhum imóvel corresponde aos seus critérios. Que tal refinar sua busca?"}
         </p>
       </div>
-
       {imoveis.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {imoveis.map((imovel) => (
-            <ImovelCard key={imovel.id} imovel={imovel} />
+            <ImovelCard
+              key={imovel.id}
+              imovel={imovel}
+              onSendToWhatsApp={handleSendToWhatsApp}
+              isSendingWhatsApp={sendingImovelId === imovel.id}
+            />
           ))}
         </div>
       ) : (

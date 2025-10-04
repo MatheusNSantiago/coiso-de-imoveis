@@ -21,19 +21,20 @@ async function doesImovelMatchPreferences(
   const isCondoInPriceRange =
     valorCondomino <= maxCondo && valorCondomino >= minCondo;
 
-  const quartos = imovel.quartos ?? 0;
-  const isWithinBedroomRange = quartos >= preferences.bedrooms;
+  const isWithingPriceRange = isRentInPriceRange && isCondoInPriceRange;
 
-  const vagas = imovel.quartos ?? 0;
+  const quartos = imovel.quartos ?? 1;
+  const isWithinQuartosRange = quartos >= preferences.bedrooms;
+
+  // const suites = imovel.suites ?? 1;
+  // const isWithinBanheiroRange = suites >= preferences.bathrooms;
+
+  const vagas = imovel.vagas_garagem ?? 0;
   const isWithinVagasRange = vagas >= preferences.parkingSpots;
 
-  const isExactMatch =
-    isRentInPriceRange &&
-    isCondoInPriceRange &&
-    isWithinBedroomRange &&
-    isWithinVagasRange;
+  const isCaracteristicasInRange = isWithinQuartosRange && isWithinVagasRange;
 
-  if (!isExactMatch) {
+  if (!(isWithingPriceRange && isCaracteristicasInRange)) {
     return false;
   }
 

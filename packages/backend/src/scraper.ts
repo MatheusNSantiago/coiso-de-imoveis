@@ -19,7 +19,7 @@ export async function runScraper() {
   const newImoveis: NewImovel[] = []; // Array para guardar novos imóveis
 
   try {
-    const imovelEndpoints = await fetchRecentImoveis(8);
+    const imovelEndpoints = await fetchRecentImoveis(15);
 
     for (const imovelEndpoint of imovelEndpoints) {
       const imovelUrl = "https://www.dfimoveis.com.br" + imovelEndpoint;
@@ -33,7 +33,7 @@ export async function runScraper() {
         console.log(
           `Imóvel já existe no banco (${imovelEndpoint}). Finalizando a busca por novos imóveis.`,
         );
-        break;
+        continue
       }
 
       // 2.2. Caso não esteja, vai na url do anúncio e da impressão para pegar os dados.

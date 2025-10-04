@@ -1,4 +1,3 @@
-// src/components/ImovelCard.tsx
 import { useState } from "react";
 import {
   Card,
@@ -20,11 +19,15 @@ import {
   Bike,
   Footprints,
   Clock,
+  MessageSquare, // Ícone para WhatsApp
+  Loader2, // Ícone de carregamento
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface ImovelCardProps {
   imovel: any;
+  onSendToWhatsApp: (imovel: any) => void; // Nova propriedade
+  isSendingWhatsApp: boolean; // Nova propriedade para estado de loading
 }
 
 const formatRent = (value: number | null) => {
@@ -46,16 +49,18 @@ const TravelModeIcon = ({ mode }: { mode: string }) => {
   return <MapPin className="h-4 w-4 text-muted-foreground" />;
 };
 
-export const ImovelCard = ({ imovel }: ImovelCardProps) => {
+export const ImovelCard = ({
+  imovel,
+  onSendToWhatsApp,
+  isSendingWhatsApp,
+}: ImovelCardProps) => {
   const images = (imovel.imagens as string[]) || [];
   const [currentImage, setCurrentImage] = useState(0);
 
-  const nextImage = () => {
+  const nextImage = () =>
     setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-  const prevImage = () => {
+  const prevImage = () =>
     setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
 
   return (
     <Card className="flex flex-col overflow-hidden">
@@ -118,7 +123,6 @@ export const ImovelCard = ({ imovel }: ImovelCardProps) => {
             <span>{imovel.area_privativa ?? "?"} m²</span>
           </div>
         </div>
-
         {imovel.matchedRules && imovel.matchedRules.length > 0 && (
           <div className="space-y-2">
             <Separator />
@@ -150,11 +154,26 @@ export const ImovelCard = ({ imovel }: ImovelCardProps) => {
             /mês
           </span>
         </div>
-        <Button asChild variant="secondary">
-          <a href={imovel.url} target="_blank" rel="noopener noreferrer">
-            Ver anúncio
-          </a>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onSendToWhatsApp(imovel)}
+            disabled={isSendingWhatsApp}
+            aria-label="Enviar para WhatsApp"
+          >
+            {isSendingWhatsApp ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            )}
+          </Button>
+          <Button asChild variant="secondary">
+            <a href={imovel.url} target="_blank" rel="noopener noreferrer">
+              Ver anúncio
+            </a>
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

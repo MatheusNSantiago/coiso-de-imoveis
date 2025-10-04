@@ -3,11 +3,20 @@ import { db } from "./db";
 import { cors } from "hono/cors";
 import { runScraper } from "./scraper";
 import cron from "node-cron";
+import { createClient } from "@supabase/supabase-js";
+import { bearerAuth } from "hono/bearer-auth";
+import type { User } from "@supabase/supabase-js";
+import { sendQueuedNotifications } from "./services/notificationService";
 
 import { gte, and, lte } from "drizzle-orm";
-import { imoveis } from "./db/schema";
-import { doesImovelMatchLocationRules } from "./services/mapsService";
+import {
+  imoveis,
+  preferences as preferencesTable,
+  userProfiles,
+} from "./db/schema";
+
 import type { UserPreferences } from "./types";
+import { doesImovelMatchLocationRules } from "./services/mapsService";
 
 console.log("Iniciando o processo do LightPanda em segundo plano...");
 const lightpandaProc = Bun.spawn(["./lightpanda", "serve", "--port", "9222"], {
@@ -16,9 +25,71 @@ const lightpandaProc = Bun.spawn(["./lightpanda", "serve", "--port", "9222"], {
 });
 console.log(`LightPanda iniciado com PID: ${lightpandaProc.pid}`);
 
-const app = new Hono();
+const app = new Hono<{
+  Variables: { user: User };
+}>();
 
 app.use("/api/*", cors());
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_ANON_KEY!,
+);
+
+app.use("/api/preferences", async (c, next) => {
+  const auth = bearerAuth({
+    verifyToken: async (token, c) => {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data.user) {
+        return false; // Autenticação falhou
+      }
+      c.set("user", data.user);
+      return true; // Autenticação bem-sucedida
+    },
+  });
+  return auth(c, next);
+});
+
+app.post("/api/preferences", async (c) => {
+  try {
+    const user = c.get("user");
+    // O tipo agora pode incluir phoneNumber
+    const newPreferences = await c.req.json<
+      UserPreferences & { phoneNumber?: string }
+    >();
+
+    if (!newPreferences || typeof newPreferences !== "object") {
+      return c.json({ success: false, error: "Preferências inválidas" }, 400);
+    }
+
+    const { phoneNumber, ...filters } = newPreferences;
+
+    // --- Salva/Atualiza as preferências ---
+    await db
+      .insert(preferencesTable)
+      .values({ userId: user.id, filters })
+      .onConflictDoUpdate({
+        target: preferencesTable.userId,
+        set: { filters, updatedAt: new Date() },
+      });
+
+    // --- Salva/Atualiza o perfil do usuário (com o telefone) ---
+    if (phoneNumber) {
+      await db
+        .insert(userProfiles)
+        .values({ userId: user.id, phoneNumber })
+        .onConflictDoUpdate({
+          target: userProfiles.userId,
+          set: { phoneNumber },
+        });
+    }
+
+    return c.json({ success: true, message: "Preferências salvas." });
+  } catch (error) {
+    console.error("Erro ao salvar preferências:", error);
+    return c.json({ success: false, error: "Erro interno do servidor" }, 500);
+  }
+});
 
 app.get("/api/imoveis", async (c) => {
   try {
@@ -92,6 +163,18 @@ cron.schedule(
     console.log("Executando o scraper agendado...");
     runScraper().catch((err) => {
       console.error("Erro na execução agendada do scraper:", err);
+    });
+  },
+  { timezone: "America/Sao_Paulo" },
+);
+
+// --- NOVO AGENDAMENTO DO NOTIFICADOR ---
+cron.schedule(
+  "*/2 * * * *", // A cada 2 minutos
+  () => {
+    console.log("Executando o notificador agendado...");
+    sendQueuedNotifications().catch((err) => {
+      console.error("Erro na execução agendada do notificador:", err);
     });
   },
   { timezone: "America/Sao_Paulo" },

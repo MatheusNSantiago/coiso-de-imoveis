@@ -137,7 +137,7 @@ const getNextDepartureTime = (timeStr: string): Date => {
  * @param rules - Um array de regras de localização definidas pelo usuário.
  */
 export async function doesImovelMatchLocationRules(
-  imovel: Imovel,
+  imovel: Partial<Imovel>,
   rules: LocationRule[],
 ) {
   if (!rules || rules.length === 0) {

@@ -5,6 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import LocationStep from "@/components/onboarding/LocationStep";
 import RoomsStep from "@/components/onboarding/RoomsStep";
 import AmenitiesStep from "@/components/onboarding/AmenitiesStep";
+import PhoneStep from "@/components/onboarding/PhoneStep";
 
 // Definindo tipos mais específicos para as regras
 export type TravelMode = "DRIVING" | "WALKING" | "BICYCLING";
@@ -21,19 +22,20 @@ export interface LocationRule {
 
 // Atualize a interface principal
 export interface UserPreferences {
-  bedrooms: number; // Ideal number. 5 means 5+.
-  bathrooms: number; // Ideal number. 5 means 5+.
-  parkingSpots: number; // Ideal number. 4 means 4+.
-  amenities: string[]; // Lista de IDs das comodidades selecionadas
+  bedrooms: number;
+  bathrooms: number;
+  parkingSpots: number;
+  amenities: string[];
   price: {
     rent: [number, number];
     condo: [number, number];
   };
-  locations: LocationRule[]; // Usando o novo tipo LocationRule
+  locations: LocationRule[];
+  phoneNumber?: string;
 }
 
 const Onboarding = () => {
-  const [step, setStep] = useState(4);
+  const [step, setStep] = useState(0);
 
   const [preferences, setPreferences] = useState<UserPreferences>({
     bedrooms: 2, // Default to 2 bedrooms
@@ -44,7 +46,9 @@ const Onboarding = () => {
       rent: [0, 1500],
       condo: [0, 250],
     },
-    locations: [], // Começa vazio
+
+    locations: [],
+    phoneNumber: "",
   });
 
   const updatePreferences = (newValues: Partial<UserPreferences>) => {
@@ -78,9 +82,15 @@ const Onboarding = () => {
       preferences={preferences}
       updatePreferences={updatePreferences}
     />,
-    <LocationStep
+    <PhoneStep
       key="step4"
-      onNext={nextStep} // Este será o último passo
+      onNext={nextStep}
+      onPrev={prevStep}
+      preferences={preferences}
+      updatePreferences={updatePreferences}
+    />,
+    <LocationStep
+      key="step5"
       onPrev={prevStep}
       preferences={preferences}
       updatePreferences={updatePreferences}

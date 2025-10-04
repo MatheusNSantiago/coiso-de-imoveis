@@ -1,3 +1,6 @@
+// packages/frontend/src/components/onboarding/LocationStep.tsx
+
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +22,13 @@ import {
   Footprints,
   Trash2,
   Clock,
+  Loader2, // Importado
 } from "lucide-react";
 import { AddLocationRuleDialog } from "./AddLocationRuleDialog";
+import axios from "axios"; // Importado
+import { supabase } from "@/lib/supabaseClient"; // Importado
 
 interface LocationStepProps {
-  onNext: () => void;
   onPrev: () => void;
   preferences: UserPreferences;
   updatePreferences: (newValues: Partial<UserPreferences>) => void;
@@ -44,6 +49,11 @@ const LocationStep = ({
   preferences,
   updatePreferences,
 }: LocationStepProps) => {
+  // --- NOVOS ESTADOS ---
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // --------------------
+
   const addRule = (newRule: Omit<LocationRule, "id">) => {
     const ruleWithId = { ...newRule, id: crypto.randomUUID() };
     updatePreferences({
@@ -59,10 +69,41 @@ const LocationStep = ({
 
   const navigate = useNavigate();
 
-  const handleFinish = () => {
-    const encodedPreferences = btoa(JSON.stringify(preferences));
-    navigate(`/dashboard?preferences=${encodedPreferences}`);
+  // --- LÓGICA ATUALIZADA ---
+  const handleFinish = async () => {
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("Você não está autenticado.");
+
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_API_BASE_URL}/api/preferences`,
+        preferences,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        },
+      );
+
+      // Apenas navega se a chamada for bem-sucedida
+      const encodedPreferences = btoa(JSON.stringify(preferences));
+      navigate(`/dashboard?preferences=${encodedPreferences}`);
+    } catch (err: any) {
+      console.error("Erro ao salvar preferências:", err);
+      setError(
+        err.response?.data?.error ||
+          "Não foi possível salvar suas preferências. Tente novamente.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
+  // --------------------------
 
   return (
     <motion.div
@@ -139,16 +180,28 @@ const LocationStep = ({
             </ul>
           )}
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
+        <CardFooter className="flex flex-col gap-2">
+          {error && (
+            <p className="text-sm text-center text-destructive mb-2">{error}</p>
+          )}
           <AddLocationRuleDialog onAddRule={addRule}>
             <Button variant="outline" className="w-full">
               <Plus className="mr-2 w-4 h-4" />
               Adicionar Nova Regra
             </Button>
           </AddLocationRuleDialog>
-          <Button className="w-full" onClick={handleFinish}>
-            Concluir e ver imóveis
+          {/* --- BOTÃO ATUALIZADO --- */}
+          <Button className="w-full" onClick={handleFinish} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              "Concluir e ver imóveis"
+            )}
           </Button>
+          {/* ----------------------- */}
         </CardFooter>
       </Card>
     </motion.div>

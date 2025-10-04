@@ -21,6 +21,7 @@
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@types/cheerio": "^1.0.0",
+    "axios": "^1.12.2",
     "cheerio": "^1.1.2",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",

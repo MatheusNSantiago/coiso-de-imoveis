@@ -6,6 +6,8 @@ import {
   scrapeImovelData,
 } from "./services/scrapingService";
 import { sleep } from "bun";
+import { runMatchingAndQueueNotifications } from "./services/matchingService";
+import type { NewImovel } from "./types";
 
 export async function runScraper() {
   console.log("=========================================");
@@ -14,9 +16,10 @@ export async function runScraper() {
   );
   console.log("=========================================");
 
+  const newImoveis: NewImovel[] = []; // Array para guardar novos imóveis
+
   try {
     const imovelEndpoints = await fetchRecentImoveis(8);
-    let newImoveisAddedCount = 0;
 
     for (const imovelEndpoint of imovelEndpoints) {
       const imovelUrl = "https://www.dfimoveis.com.br" + imovelEndpoint;
@@ -34,29 +37,32 @@ export async function runScraper() {
       }
 
       // 2.2. Caso não esteja, vai na url do anúncio e da impressão para pegar os dados.
-      const imovel = await scrapeImovelData(imovelEndpoint);
-      if (!imovel) continue;
+      const imovelData = await scrapeImovelData(imovelEndpoint);
+      if (!imovelData || !imovelData.id) continue;
 
-      if (!imovel.endereco) {
-        console.log(imovel);
-      }
-
-      await sleep(5000);
+      await sleep(5000); // Sleep pro cloudflare não me pegar
 
       try {
-        await db.insert(imoveis).values(imovel as any);
+        await db.insert(imoveis).values(imovelData as NewImovel);
         console.log(
-          `=> Imóvel ${imovel.id} salvo com sucesso no banco de dados.`,
+          `=> Imóvel ${imovelData.id} salvo com sucesso no banco de dados.`,
         );
-        newImoveisAddedCount++;
+        newImoveis.push(imovelData as NewImovel);
       } catch (dbError) {
-        console.error(`Erro ao salvar imóvel ${imovel.id} no banco:`, dbError);
+        console.error(
+          `Erro ao salvar imóvel ${imovelData.id} no banco:`,
+          dbError,
+        );
       }
     }
 
     console.log(
-      `\nProcesso finalizado. Total de novos imóveis adicionados: ${newImoveisAddedCount}`,
+      `\nScraping finalizado. Total de novos imóveis adicionados: ${newImoveis.length}`,
     );
+
+    if (newImoveis.length > 0) {
+      await runMatchingAndQueueNotifications(newImoveis);
+    }
   } catch (error) {
     console.error(
       "Um erro geral ocorreu durante a execução do scraper:",

@@ -1,5 +1,4 @@
-# Etapa de build: usa uma imagem Go para compilar a aplicação
-FROM golang:1.22-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
@@ -30,9 +29,6 @@ COPY --from=builder /whatsapp-bridge .
 
 # Expõe a porta 8080, que é a porta que o servidor de API em Go usa
 EXPOSE 8080
-
-# A LINHA ABAIXO FOI REMOVIDA
-# VOLUME /root/store
 
 # O comando que será executado quando o container iniciar
 CMD ["./whatsapp-bridge"]

@@ -1,0 +1,30 @@
+services:
+  whatsapp-bridge:
+    # 1. 'build: .': Diz ao Docker para construir a imagem usando
+    #    o Dockerfile que está no mesmo diretório (.).
+    build: .
+
+    # 2. 'container_name': Um nome amigável para o nosso container.
+    container_name: vigia-whatsapp-bridge
+
+    # 3. 'ports': Mapeia a porta 8080 de dentro do container
+    #    para a porta 8080 da sua máquina local.
+    #    Isso permite que seu backend (rodando localmente)
+    #    acesse a API do bridge em http://localhost:8080
+    ports:
+      - "8080:8080"
+
+    # 4. 'volumes': A parte mais importante.
+    #    - Cria uma pasta chamada 'store-data' no seu computador,
+    #      na mesma pasta do docker-compose.yml.
+    #    - Espelha essa pasta para o diretório /root/store dentro do container.
+    #    - Isso garante que a sessão do WhatsApp seja salva no seu disco
+    #      e persista entre as execuções do container.
+    volumes:
+      - ./store-data:/root/store
+
+    # 5. 'stdin_open' e 'tty': Necessário para que o container
+    #    permaneça rodando e interativo, especialmente para
+    #    ver o QR code nos logs.
+    stdin_open: true
+    tty: true
